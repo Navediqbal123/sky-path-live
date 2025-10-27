@@ -2,58 +2,16 @@ import Hero from "@/components/Hero";
 import MapView from "@/components/MapView";
 import FlightCard from "@/components/FlightCard";
 import StatsGrid from "@/components/StatsGrid";
-import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useFlightData } from "@/hooks/useFlightData";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
-  // Sample flight data (would come from AviationStack API)
-  const sampleFlights = [
-    {
-      flightNumber: "AA123",
-      airline: "American Airlines",
-      departure: "JFK, New York",
-      arrival: "LAX, Los Angeles",
-      status: "In Air" as const,
-      altitude: "35,000 ft",
-      speed: "520 mph",
-      estimatedArrival: "14:45 PST",
-    },
-    {
-      flightNumber: "DL456",
-      airline: "Delta Airlines",
-      departure: "ATL, Atlanta",
-      arrival: "LHR, London",
-      status: "On Time" as const,
-      altitude: "38,000 ft",
-      speed: "545 mph",
-      estimatedArrival: "06:30 GMT",
-    },
-    {
-      flightNumber: "UA789",
-      airline: "United Airlines",
-      departure: "SFO, San Francisco",
-      arrival: "NRT, Tokyo",
-      status: "Delayed" as const,
-      estimatedArrival: "18:20 JST",
-    },
-  ];
+  const { data: flightData, isLoading, error } = useFlightData();
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <Hero />
-
-      {/* API Notice */}
-      <div className="container mx-auto px-4 py-6">
-        <Alert className="border-primary/50 bg-primary/10">
-          <AlertCircle className="h-4 w-4 text-primary" />
-          <AlertTitle className="text-primary">API Integration Required</AlertTitle>
-          <AlertDescription className="text-muted-foreground">
-            To enable live flight tracking, you'll need to add your AviationStack API key. 
-            Consider connecting to Lovable Cloud for secure API key storage.
-          </AlertDescription>
-        </Alert>
-      </div>
 
       {/* Stats Grid */}
       <div className="container mx-auto px-4 py-8">
@@ -80,14 +38,51 @@ const Index = () => {
         <div className="space-y-4 mb-6">
           <h2 className="text-3xl font-bold">Active Flights</h2>
           <p className="text-muted-foreground">
-            Currently tracked flights with live data
+            {isLoading ? "Loading live flight data..." : "Currently tracked flights with live data"}
           </p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {sampleFlights.map((flight, index) => (
-            <FlightCard key={index} {...flight} />
-          ))}
-        </div>
+        
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+        
+        {error && (
+          <div className="text-center py-12 text-destructive">
+            Failed to load flight data. Please check your API configuration.
+          </div>
+        )}
+        
+        {flightData?.data && flightData.data.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {flightData.data.slice(0, 6).map((flight, index) => (
+              <FlightCard
+                key={`${flight.flight.iata}-${index}`}
+                flightNumber={flight.flight.iata || flight.flight.number}
+                airline={flight.airline.name}
+                departure={`${flight.departure.iata}, ${flight.departure.airport}`}
+                arrival={`${flight.arrival.iata}, ${flight.arrival.airport}`}
+                status={flight.flight_status === "active" ? "In Air" : 
+                       flight.flight_status === "scheduled" ? "On Time" : 
+                       flight.flight_status === "landed" ? "Landed" : "Delayed"}
+                altitude={flight.live?.altitude ? `${flight.live.altitude} ft` : undefined}
+                speed={flight.live?.speed_horizontal ? `${flight.live.speed_horizontal} mph` : undefined}
+                estimatedArrival={new Date(flight.arrival.estimated || flight.arrival.scheduled).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZoneName: 'short'
+                })}
+              />
+            ))}
+          </div>
+        )}
+        
+        {!isLoading && !error && (!flightData?.data || flightData.data.length === 0) && (
+          <div className="text-center py-12 text-muted-foreground">
+            No live flights available at the moment.
+          </div>
+        )}
       </div>
 
       {/* Footer */}
