@@ -21,9 +21,23 @@ serve(async (req) => {
     const url = new URL(req.url);
     const params = new URLSearchParams(url.search);
     
+    // Get flight code from request body if provided
+    let flightIata = '';
+    try {
+      const body = await req.json();
+      flightIata = body?.flight_iata || '';
+    } catch {
+      // No body or invalid JSON, continue without flight filter
+    }
+    
     // Build the API URL with parameters
     const aviationStackUrl = new URL(apiUrl);
     aviationStackUrl.searchParams.set('access_key', apiKey);
+    
+    // Add flight IATA if provided
+    if (flightIata) {
+      aviationStackUrl.searchParams.set('flight_iata', flightIata);
+    }
     
     // Forward any additional query parameters
     params.forEach((value, key) => {
