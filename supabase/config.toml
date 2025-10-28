@@ -1,1 +1,4 @@
 project_id = "jhaddpoepssjdsapnoje"
+
+[functions.fetch-flights]
+verify_jwt = false  # Intentionally public with rate limiting

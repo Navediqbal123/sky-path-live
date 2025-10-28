@@ -5,9 +5,52 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Rate limiting: Track requests per IP
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 20; // requests per minute
+const RATE_WINDOW = 60000; // 1 minute in milliseconds
+
+// Allowed query parameters whitelist
+const ALLOWED_PARAMS = ['flight_iata', 'airline_iata', 'dep_iata', 'arr_iata', 'limit'];
+const MAX_PARAM_LENGTH = 50;
+
+function getRateLimitKey(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  return forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+}
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(key);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + RATE_WINDOW });
+    return true;
+  }
+
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting check
+  const rateLimitKey = getRateLimitKey(req);
+  if (!checkRateLimit(rateLimitKey)) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+      {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   try {
@@ -26,7 +69,15 @@ serve(async (req) => {
     try {
       const body = await req.json();
       flightIata = body?.flight_iata || '';
-    } catch {
+      
+      // Validate flight_iata input
+      if (flightIata && flightIata.length > MAX_PARAM_LENGTH) {
+        throw new Error('Flight code is too long');
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Flight code is too long') {
+        throw error;
+      }
       // No body or invalid JSON, continue without flight filter
     }
     
@@ -39,9 +90,9 @@ serve(async (req) => {
       aviationStackUrl.searchParams.set('flight_iata', flightIata);
     }
     
-    // Forward any additional query parameters
+    // Forward only whitelisted query parameters with validation
     params.forEach((value, key) => {
-      if (key !== 'access_key') {
+      if (ALLOWED_PARAMS.includes(key) && value.length <= MAX_PARAM_LENGTH) {
         aviationStackUrl.searchParams.set(key, value);
       }
     });
@@ -53,7 +104,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('AviationStack API error:', data);
-      throw new Error(data.error?.info || 'Failed to fetch flight data');
+      throw new Error('Unable to fetch flight data');
     }
 
     return new Response(JSON.stringify(data), {
@@ -61,9 +112,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in fetch-flights function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Unable to process request' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
