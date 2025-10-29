@@ -1,9 +1,25 @@
 import { Card } from "@/components/ui/card";
-import { Settings as SettingsIcon, Bell, Globe, Palette, Shield } from "lucide-react";
+import { Settings as SettingsIcon, Bell, Globe, Palette, Shield, LogOut } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -91,6 +107,29 @@ const Settings = () => {
                 </Label>
                 <Switch id="analytics" />
               </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="gradient-card border-border/50 p-6">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-destructive/10">
+                <LogOut className="w-6 h-6 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-foreground">Logout</h3>
+                <p className="text-sm text-muted-foreground">
+                  Sign out of your account
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={handleLogout}
+                className="font-semibold"
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </Card>
