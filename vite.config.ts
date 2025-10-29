@@ -9,10 +9,17 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  preview: {
+    allowedHosts: ["sky-path-live.onrender.com"], // ✅ Render domain allowed
+    port: 8080,
+  },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    chunkSizeWarningLimit: 2000, // ✅ Optional: avoids warning about large chunks
   },
 }));
