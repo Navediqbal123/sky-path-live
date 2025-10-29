@@ -112,23 +112,19 @@ const Settings = () => {
         </Card>
 
         <Card className="gradient-card border-border/50 p-6">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-destructive/10">
                 <LogOut className="w-6 h-6 text-destructive" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-foreground">Logout</h3>
+                <h3 className="text-lg font-bold text-foreground">Sign Out</h3>
                 <p className="text-sm text-muted-foreground">
-                  Sign out of your account
+                  Log out of your SkyTrack account
                 </p>
               </div>
-              <Button
-                variant="destructive"
-                onClick={handleLogout}
-                className="font-semibold"
-              >
-                Logout
+              <Button variant="destructive" onClick={handleLogout}>
+                Sign Out
               </Button>
             </div>
           </div>

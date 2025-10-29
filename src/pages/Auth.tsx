@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Plane } from "lucide-react";
+import { Plane, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
@@ -24,8 +24,9 @@ const Auth = () => {
       }
     });
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
+      if (session && event === "SIGNED_IN") {
         navigate("/");
       }
     });
@@ -33,7 +34,7 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -48,7 +49,7 @@ const Auth = () => {
 
         toast({
           title: "Welcome back!",
-          description: "Successfully logged in.",
+          description: "You've successfully logged in.",
         });
       } else {
         const { error } = await supabase.auth.signUp({
@@ -63,13 +64,13 @@ const Auth = () => {
 
         toast({
           title: "Account created!",
-          description: "Welcome to SkyTrack.",
+          description: "You've successfully signed up.",
         });
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -79,32 +80,31 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md gradient-card border-border/50 p-8">
-        <div className="text-center space-y-2 mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-primary/10 glow-primary">
-              <Plane className="w-12 h-12 text-primary" />
-            </div>
+      <Card className="w-full max-w-md p-8 gradient-card border-border/50">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Plane className="w-10 h-10 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">SkyTrack</h1>
           </div>
-          <h1 className="text-4xl font-bold text-foreground text-glow">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
             Welcome to SkyTrack
-          </h1>
+          </h2>
           <p className="text-muted-foreground">
-            {isLogin ? "Sign in to track flights" : "Create an account to get started"}
+            {isLogin ? "Sign in to track flights" : "Create your account"}
           </p>
         </div>
 
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-foreground">Email</Label>
             <Input
               id="email"
               type="email"
-              placeholder="your@email.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-secondary/50 border-border/50 text-foreground"
+              className="bg-background/50"
             />
           </div>
 
@@ -118,26 +118,35 @@ const Auth = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="bg-secondary/50 border-border/50 text-foreground"
+              className="bg-background/50"
             />
           </div>
 
           <Button
             type="submit"
-            className="w-full gradient-primary text-primary-foreground font-semibold"
+            className="w-full"
             disabled={loading}
           >
-            {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Please wait
+              </>
+            ) : (
+              isLogin ? "Sign In" : "Sign Up"
+            )}
           </Button>
         </form>
 
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            className="text-primary hover:text-primary/80 text-sm transition-colors"
+            className="text-primary hover:underline text-sm"
           >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            {isLogin
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Sign in"}
           </button>
         </div>
       </Card>
