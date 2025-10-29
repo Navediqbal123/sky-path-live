@@ -4,29 +4,84 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkyTrack</title>
-    <meta name="description" content="Track live flights in real-time with interactive maps, flight paths, and airline data. Monitor departures, arrivals, and delays globally.">
+
+    <meta
+      name="description"
+      content="Track live flights in real-time with interactive maps, flight paths, and airline data. Monitor departures, arrivals, and delays globally."
+    />
     <meta name="author" content="SkyTrack Team" />
-    <meta name="keywords" content="flight tracking, live flights, airplane tracker, aviation, flight status, airline tracker">
+    <meta
+      name="keywords"
+      content="flight tracking, live flights, airplane tracker, aviation, flight status, airline tracker"
+    />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="SkyTrack" />
-    <meta property="og:description" content="Track live flights in real-time with interactive maps, flight paths, and airline data. Monitor departures, arrivals, and delays globally." />
-    <meta property="og:image" content="https://skytrack.vercel.app/images/skytrack-preview.png" />
+    <meta
+      property="og:description"
+      content="Track live flights in real-time with interactive maps, flight paths, and airline data. Monitor departures, arrivals, and delays globally."
+    />
+    <meta
+      property="og:image"
+      content="https://skytrack.vercel.app/images/skytrack-preview.png"
+    />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@SkyTrack_Live" />
     <meta name="twitter:title" content="SkyTrack" />
-    <meta name="twitter:description" content="Track live flights in real-time with interactive maps, flight paths, and airline data. Monitor departures, arrivals, and delays globally." />
-    <meta name="twitter:image" content="https://skytrack.vercel.app/images/skytrack-preview.png" />
+    <meta
+      name="twitter:description"
+      content="Track live flights in real-time with interactive maps, flight paths, and airline data. Monitor departures, arrivals, and delays globally."
+    />
+    <meta
+      name="twitter:image"
+      content="https://skytrack.vercel.app/images/skytrack-preview.png"
+    />
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0b0b0b;
+        color: #fff;
+        height: 100%;
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        min-height: 100vh;
+        display: none;
+      }
+
+      footer {
+        text-align: center;
+        color: #888;
+        font-size: 13px;
+        padding: 8px;
+        display: none;
+      }
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
-    <footer style="text-align:center; color:#888; font-size:13px; padding:8px;">
+    <footer id="footer">
       © 2025 <strong>SkyTrack</strong> — All Rights Reserved
     </footer>
+
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Show content only when React is ready
+      window.addEventListener("DOMContentLoaded", () => {
+        const root = document.getElementById("root");
+        const footer = document.getElementById("footer");
+        root.style.display = "block";
+        footer.style.display = "block";
+      });
+    </script>
   </body>
 </html>
