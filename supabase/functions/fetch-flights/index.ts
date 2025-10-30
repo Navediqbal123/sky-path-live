@@ -14,6 +14,28 @@ const RATE_WINDOW = 60000; // 1 minute in milliseconds
 const ALLOWED_PARAMS = ['flight_iata', 'airline_iata', 'dep_iata', 'arr_iata', 'limit'];
 const MAX_PARAM_LENGTH = 50;
 
+// Format validation patterns (IATA codes)
+const FLIGHT_CODE_PATTERN = /^[A-Z0-9]{2}[0-9]{1,4}$/i;
+const AIRLINE_CODE_PATTERN = /^[A-Z]{2}$/i;
+const AIRPORT_CODE_PATTERN = /^[A-Z]{3}$/i;
+const LIMIT_PATTERN = /^[0-9]+$/;
+
+function validateParamFormat(key: string, value: string): boolean {
+  switch(key) {
+    case 'flight_iata':
+      return FLIGHT_CODE_PATTERN.test(value);
+    case 'airline_iata':
+      return AIRLINE_CODE_PATTERN.test(value);
+    case 'dep_iata':
+    case 'arr_iata':
+      return AIRPORT_CODE_PATTERN.test(value);
+    case 'limit':
+      return LIMIT_PATTERN.test(value) && parseInt(value) > 0 && parseInt(value) <= 100;
+    default:
+      return false;
+  }
+}
+
 function getRateLimitKey(req: Request): string {
   const forwarded = req.headers.get('x-forwarded-for');
   return forwarded ? forwarded.split(',')[0].trim() : 'unknown';
@@ -71,11 +93,17 @@ serve(async (req) => {
       flightIata = body?.flight_iata || '';
       
       // Validate flight_iata input
-      if (flightIata && flightIata.length > MAX_PARAM_LENGTH) {
-        throw new Error('Flight code is too long');
+      if (flightIata) {
+        if (flightIata.length > MAX_PARAM_LENGTH) {
+          throw new Error('Flight code is too long');
+        }
+        if (!FLIGHT_CODE_PATTERN.test(flightIata)) {
+          console.warn(`Invalid flight code format rejected: ${flightIata.substring(0, 10)}`);
+          throw new Error('Invalid flight code format');
+        }
       }
     } catch (error) {
-      if (error instanceof Error && error.message === 'Flight code is too long') {
+      if (error instanceof Error && (error.message === 'Flight code is too long' || error.message === 'Invalid flight code format')) {
         throw error;
       }
       // No body or invalid JSON, continue without flight filter
@@ -93,7 +121,11 @@ serve(async (req) => {
     // Forward only whitelisted query parameters with validation
     params.forEach((value, key) => {
       if (ALLOWED_PARAMS.includes(key) && value.length <= MAX_PARAM_LENGTH) {
-        aviationStackUrl.searchParams.set(key, value);
+        if (validateParamFormat(key, value)) {
+          aviationStackUrl.searchParams.set(key, value);
+        } else {
+          console.warn(`Invalid parameter format rejected: ${key}=${value.substring(0, 10)}`);
+        }
       }
     });
 
