@@ -24,27 +24,29 @@ export function AppSidebar() {
   const { open } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/50">
-      <SidebarContent>
+    <Sidebar collapsible="icon" className="border-r border-border bg-card">
+      <SidebarContent className="bg-card">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-bold text-primary mb-2">
-            {open && "Live Flight Tracker"}
+          <SidebarGroupLabel className="px-4 py-3 text-base font-bold text-primary">
+            SkyTrack Live
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1 px-2">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
-                        isActive
-                          ? "bg-primary/20 text-primary hover:bg-primary/30"
-                          : "hover:bg-accent/50"
+                        `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
+                          isActive
+                            ? "bg-primary text-primary-foreground font-medium shadow-sm"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        }`
                       }
                     >
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.title}</span>
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
