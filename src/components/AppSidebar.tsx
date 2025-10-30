@@ -27,7 +27,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border bg-card">
       <SidebarContent className="bg-card">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 py-3 text-base font-bold text-primary">
+          <SidebarGroupLabel className="px-4 py-3 text-base font-bold text-sky-light">
             SkyTrack Live
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -40,8 +40,8 @@ export function AppSidebar() {
                       className={({ isActive }) =>
                         `flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                           isActive
-                            ? "bg-primary text-primary-foreground font-medium shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            ? "bg-primary text-navy-deep font-medium shadow-sm"
+                            : "text-card-foreground hover:bg-secondary hover:text-card-foreground"
                         }`
                       }
                     >
