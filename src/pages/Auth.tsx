@@ -7,6 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Plane, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().email({ message: "Invalid email address" }).max(255, { message: "Email must be less than 255 characters" }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }).max(100, { message: "Password must be less than 100 characters" })
+});
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -39,10 +45,26 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const result = authSchema.safeParse({ email, password });
+      
+      if (!result.success) {
+        const firstError = result.error.errors[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const { email: validEmail, password: validPassword } = result.data;
+
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validEmail,
+          password: validPassword,
         });
 
         if (error) throw error;
@@ -53,8 +75,8 @@ const Auth = () => {
         });
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: validEmail,
+          password: validPassword,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -68,9 +90,20 @@ const Auth = () => {
         });
       }
     } catch (error: any) {
+      // Map errors to safe user messages
+      let errorMessage = "An error occurred during authentication";
+      
+      if (error.message?.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password";
+      } else if (error.message?.includes("User already registered")) {
+        errorMessage = "An account with this email already exists";
+      } else if (error.message?.includes("Email not confirmed")) {
+        errorMessage = "Please confirm your email address";
+      }
+
       toast({
-        title: "Error",
-        description: error.message || "An error occurred",
+        title: "Authentication Error",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -117,7 +150,7 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               className="bg-background/50"
             />
           </div>
