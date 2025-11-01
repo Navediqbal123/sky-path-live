@@ -1,8 +1,11 @@
-import { Plane, Globe, Building2, History, Settings } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Plane, Globe, Building2, History, Settings, LogOut } from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -22,6 +25,25 @@ const menuItems = [
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Logged out",
+        description: "You've been successfully logged out.",
+      });
+      navigate("/auth");
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-[#1E90FF]/20" style={{ backgroundColor: '#000000' }}>
@@ -57,6 +79,20 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter style={{ backgroundColor: '#000000' }} className="border-t border-[#1E90FF]/20 p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-300 font-bold hover:shadow-[0_0_10px_rgba(30,144,255,0.4)] w-full"
+              style={{ color: '#FFFFFF' }}
+            >
+              <LogOut className="w-5 h-5 shrink-0" />
+              <span className="text-sm">Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
