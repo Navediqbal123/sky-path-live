@@ -27,8 +27,9 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border bg-card">
       <SidebarContent className="bg-card">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 py-3 text-base font-bold text-white">
-            SkyTrack Live
+          <SidebarGroupLabel className="px-4 py-3 text-base font-bold text-white flex items-center gap-2">
+            <Plane className="w-6 h-6" />
+            SkyTrack
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1 px-2">
