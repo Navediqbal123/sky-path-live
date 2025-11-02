@@ -6,7 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import Index from "./pages/Index";
-import PlaceholderPage from "./pages/PlaceholderPage";
+import TrackFlight from "./pages/TrackFlight";
+import LiveRadar from "./pages/LiveRadar";
+import FlightHistory from "./pages/FlightHistory";
+import AirportInfo from "./pages/AirportInfo";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -22,11 +26,11 @@ const App = () => (
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/history" element={<PlaceholderPage />} />
-                <Route path="/documents" element={<PlaceholderPage />} />
-                <Route path="/analytics" element={<PlaceholderPage />} />
-                <Route path="/team" element={<PlaceholderPage />} />
-                <Route path="/settings" element={<PlaceholderPage />} />
+                <Route path="/track-flight" element={<TrackFlight />} />
+                <Route path="/live-radar" element={<LiveRadar />} />
+                <Route path="/flight-history" element={<FlightHistory />} />
+                <Route path="/airport-info" element={<AirportInfo />} />
+                <Route path="/settings" element={<Settings />} />
               </Routes>
             </main>
           </div>

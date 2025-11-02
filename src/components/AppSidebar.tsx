@@ -1,4 +1,4 @@
-import { MessageSquare, History, FileText, Settings, TrendingUp, Users } from "lucide-react";
+import { MessageSquare, Plane, Radar, History, Building2, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "Chat", url: "/", icon: MessageSquare },
-  { title: "History", url: "/history", icon: History },
-  { title: "Documents", url: "/documents", icon: FileText },
-  { title: "Analytics", url: "/analytics", icon: TrendingUp },
-  { title: "Team", url: "/team", icon: Users },
+  { title: "AI Assistant", url: "/", icon: MessageSquare },
+  { title: "Track Flight", url: "/track-flight", icon: Plane },
+  { title: "Live Radar", url: "/live-radar", icon: Radar },
+  { title: "Flight History", url: "/flight-history", icon: History },
+  { title: "Airport Info", url: "/airport-info", icon: Building2 },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -27,8 +27,8 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 py-4 text-[22px] font-bold flex items-center gap-3">
-            <MessageSquare className="w-7 h-7" />
-            AI Assistant
+            <Plane className="w-7 h-7" />
+            SkyTrack
           </SidebarGroupLabel>
           <Separator className="mx-4 mb-3 bg-border/50" />
           <SidebarGroupContent>
