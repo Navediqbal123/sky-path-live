@@ -3,6 +3,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -21,7 +22,9 @@ export function Chatbot() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -29,8 +32,109 @@ export function Chatbot() {
     }
   }, [messages]);
 
+  const streamChat = async (userMsg: Message) => {
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+    
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: messages
+            .filter(m => m.id !== "1")
+            .map(m => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text }))
+            .concat([{ role: "user", content: userMsg.text }])
+        }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        if (resp.status === 429 || resp.status === 402) {
+          const error = await resp.json();
+          toast({
+            title: "Error",
+            description: error.error || "Unable to process request",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw new Error("Failed to start stream");
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let streamDone = false;
+      let assistantSoFar = "";
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantSoFar += content;
+              setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.sender === "bot" && last.id === "streaming") {
+                  return prev.map((m, i) => 
+                    i === prev.length - 1 ? { ...m, text: assistantSoFar } : m
+                  );
+                }
+                return [...prev, {
+                  id: "streaming",
+                  text: assistantSoFar,
+                  sender: "bot" as const,
+                  timestamp: new Date(),
+                }];
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      // Update final message with proper ID
+      setMessages(prev => prev.map(m => 
+        m.id === "streaming" ? { ...m, id: Date.now().toString() } : m
+      ));
+
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -41,17 +145,8 @@ export function Chatbot() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "I'm a demo chatbot. In a real implementation, I would process your message and provide a meaningful response.",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    }, 1000);
+    setIsLoading(true);
+    streamChat(userMessage);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -112,7 +207,7 @@ export function Chatbot() {
             onClick={handleSend}
             size="icon"
             className="h-[60px] w-[60px] rounded-full shrink-0"
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
           >
             <Send className="h-5 w-5" />
           </Button>
