@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Chatbot } from "@/components/Chatbot";
 import { ChatHistory } from "@/components/ChatHistory";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Menu } from "lucide-react";
+import { Menu, History } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const [showHistory, setShowHistory] = useState(false);
+
   return (
     <div className="h-screen flex flex-col">
       {/* Mobile Header with Sidebar Trigger */}
@@ -11,19 +15,33 @@ const Index = () => {
         <SidebarTrigger>
           <Menu className="h-6 w-6" />
         </SidebarTrigger>
-        <h1 className="text-xl font-bold">AI Assistant</h1>
+        <h1 className="text-xl font-bold">ChatNova AI</h1>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+      <div className="flex-1 flex min-h-0">
+        {/* Internal Sidebar for History */}
+        <div className="hidden md:flex md:w-16 border-r border-border/50 flex-col items-center py-4 gap-4">
+          <Button
+            variant={showHistory ? "secondary" : "ghost"}
+            size="icon"
+            onClick={() => setShowHistory(!showHistory)}
+            className="w-12 h-12"
+          >
+            <History className="w-5 h-5" />
+          </Button>
+        </div>
+
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-h-0">
           <Chatbot />
         </div>
 
-        {/* Chat History Sidebar */}
-        <div className="hidden xl:flex xl:w-80 border-l border-border/50">
-          <ChatHistory />
-        </div>
+        {/* Chat History Panel */}
+        {showHistory && (
+          <div className="hidden md:flex md:w-80 border-l border-border/50">
+            <ChatHistory />
+          </div>
+        )}
       </div>
     </div>
   );

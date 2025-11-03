@@ -27,8 +27,8 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 py-4 text-[22px] font-bold flex items-center gap-3">
-            <Plane className="w-7 h-7" />
-            SkyTrack
+            <MessageSquare className="w-7 h-7" />
+            ChatNova AI
           </SidebarGroupLabel>
           <Separator className="mx-4 mb-3 bg-border/50" />
           <SidebarGroupContent>
