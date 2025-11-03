@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { History, Plane, Clock, MapPin } from "lucide-react";
+import { History, Plane, Clock, MapPin, Menu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const FlightHistory = () => {
   const historyData = [
@@ -31,13 +32,20 @@ const FlightHistory = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-3">
-            <History className="w-10 h-10 text-primary" />
-            Flight History
-          </h1>
+    <div className="min-h-screen bg-background">
+      <div className="lg:hidden border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <SidebarTrigger>
+          <Menu className="h-6 w-6" />
+        </SidebarTrigger>
+        <h1 className="text-xl font-bold">Flight History</h1>
+      </div>
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-3">
+              <History className="w-10 h-10 text-primary" />
+              Flight History
+            </h1>
           <p className="text-muted-foreground">
             View your previously tracked flights
           </p>
@@ -101,6 +109,7 @@ const FlightHistory = () => {
             </p>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );

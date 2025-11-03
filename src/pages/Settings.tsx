@@ -1,18 +1,26 @@
 import { Card } from "@/components/ui/card";
-import { Settings as SettingsIcon, Bell, Globe, Palette, Shield } from "lucide-react";
+import { Settings as SettingsIcon, Bell, Globe, Palette, Shield, Menu } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Settings = () => {
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-3">
-            <SettingsIcon className="w-10 h-10 text-primary" />
-            Settings
-          </h1>
+    <div className="min-h-screen bg-background">
+      <div className="lg:hidden border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <SidebarTrigger>
+          <Menu className="h-6 w-6" />
+        </SidebarTrigger>
+        <h1 className="text-xl font-bold">Settings</h1>
+      </div>
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-3">
+              <SettingsIcon className="w-10 h-10 text-primary" />
+              Settings
+            </h1>
           <p className="text-muted-foreground">
             Customize your flight tracking experience
           </p>
@@ -96,6 +104,7 @@ const Settings = () => {
           </div>
         </Card>
 
+        </div>
       </div>
     </div>
   );

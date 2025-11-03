@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Building2, MapPin, Plane, Search } from "lucide-react";
+import { Building2, MapPin, Plane, Search, Menu } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const AirportInfo = () => {
   const [airportCode, setAirportCode] = useState("");
@@ -13,13 +14,20 @@ const AirportInfo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-3">
-            <Building2 className="w-10 h-10 text-primary" />
-            Airport Information
-          </h1>
+    <div className="min-h-screen bg-background">
+      <div className="lg:hidden border-b border-border/50 px-4 py-3 flex items-center gap-3">
+        <SidebarTrigger>
+          <Menu className="h-6 w-6" />
+        </SidebarTrigger>
+        <h1 className="text-xl font-bold">Airport Info</h1>
+      </div>
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <h1 className="text-4xl font-bold text-foreground flex items-center justify-center gap-3">
+              <Building2 className="w-10 h-10 text-primary" />
+              Airport Information
+            </h1>
           <p className="text-muted-foreground">
             Search for airport details and statistics
           </p>
@@ -101,6 +109,7 @@ const AirportInfo = () => {
             ))}
           </div>
         </Card>
+        </div>
       </div>
     </div>
   );
