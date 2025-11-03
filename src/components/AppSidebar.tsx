@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "AI Assistant", url: "/", icon: MessageSquare },
+  { title: "ChatNova AI", url: "/", icon: MessageSquare },
   { title: "Track Flight", url: "/track-flight", icon: Plane },
   { title: "Live Radar", url: "/live-radar", icon: Radar },
   { title: "Flight History", url: "/flight-history", icon: History },
