@@ -158,14 +158,8 @@ export function Chatbot() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b border-border/50 px-6 py-4">
-        <h2 className="text-2xl font-bold">AI Assistant</h2>
-        <p className="text-muted-foreground text-sm mt-1">
-          Ask me anything
-        </p>
-      </div>
 
-      <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef}>
+      <ScrollArea className="flex-1 px-6 py-6 pt-8" ref={scrollRef}>
         <div className="space-y-4 pb-4">
           {messages.map((message) => (
             <div
@@ -181,13 +175,15 @@ export function Chatbot() {
                     : "bg-card border border-border rounded-bl-sm"
                 }`}
               >
-                <p className="text-sm leading-relaxed">{message.text}</p>
-                <span className="text-xs opacity-60 mt-1 block">
-                  {message.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+                <div className="flex items-end gap-3 justify-between">
+                  <p className="text-sm leading-relaxed flex-1">{message.text}</p>
+                  <span className="text-xs opacity-60 whitespace-nowrap">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
               </div>
             </div>
           ))}

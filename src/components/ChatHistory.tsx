@@ -28,19 +28,34 @@ const mockChats: Chat[] = [
     lastMessage: "Explain React hooks",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
   },
+  {
+    id: "4",
+    title: "Previous Discussion",
+    lastMessage: "Database design patterns",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
+  },
+  {
+    id: "5",
+    title: "Old Conversation",
+    lastMessage: "Understanding TypeScript",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
+  },
 ];
 
 export function ChatHistory() {
   const formatTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
+    const hours = Math.floor(diff / 3600000);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
+    if (hours < 24) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days} days ago`;
+    
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
   };
 
   return (
