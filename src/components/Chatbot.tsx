@@ -24,6 +24,7 @@ export function Chatbot() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -193,33 +194,39 @@ export function Chatbot() {
 
       <div className="border-t border-border/50 px-6 py-4">
         <div className="flex gap-2 items-center">
-          <Popover>
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 size="icon"
                 variant="outline"
                 className="h-[60px] w-[60px] rounded-full shrink-0"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className={`h-5 w-5 transition-transform duration-300 ${isPopoverOpen ? 'rotate-180' : ''}`} />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-2" align="start">
+            <PopoverContent className="w-40 p-2 bg-background z-50" align="start">
               <div className="flex flex-col gap-1">
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-2"
-                  onClick={() => document.getElementById('gallery-upload')?.click()}
+                  onClick={() => {
+                    document.getElementById('gallery-upload')?.click();
+                    setIsPopoverOpen(false);
+                  }}
                 >
                   <Upload className="h-4 w-4" />
-                  <span>Upload from Gallery</span>
+                  <span>Gallery</span>
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-2"
-                  onClick={() => document.getElementById('camera-input')?.click()}
+                  onClick={() => {
+                    document.getElementById('camera-input')?.click();
+                    setIsPopoverOpen(false);
+                  }}
                 >
                   <Camera className="h-4 w-4" />
-                  <span>Take Photo</span>
+                  <span>Camera</span>
                 </Button>
               </div>
             </PopoverContent>
