@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Upload, Camera } from "lucide-react";
+import { Send, Upload, Camera, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -191,59 +192,74 @@ export function Chatbot() {
       </ScrollArea>
 
       <div className="border-t border-border/50 px-6 py-4">
-        <div className="flex gap-2 items-end">
-          <div className="flex gap-2">
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-[60px] w-[60px] rounded-full shrink-0"
-              onClick={() => document.getElementById('gallery-upload')?.click()}
-            >
-              <Upload className="h-5 w-5" />
-            </Button>
-            <input
-              id="gallery-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  console.log("Gallery file selected:", file);
-                  // Handle gallery upload
-                }
-              }}
-            />
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-[60px] w-[60px] rounded-full shrink-0"
-              onClick={() => document.getElementById('camera-input')?.click()}
-            >
-              <Camera className="h-5 w-5" />
-            </Button>
-            <input
-              id="camera-input"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  console.log("Camera photo taken:", file);
-                  // Handle camera photo
-                }
-              }}
+        <div className="flex gap-2 items-center">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-[60px] w-[60px] rounded-full shrink-0"
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-2" align="start">
+              <div className="flex flex-col gap-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2"
+                  onClick={() => document.getElementById('gallery-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Upload from Gallery</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2"
+                  onClick={() => document.getElementById('camera-input')?.click()}
+                >
+                  <Camera className="h-4 w-4" />
+                  <span>Take Photo</span>
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <input
+            id="gallery-upload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                console.log("Gallery file selected:", file);
+                // Handle gallery upload
+              }
+            }}
+          />
+          <input
+            id="camera-input"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                console.log("Camera photo taken:", file);
+                // Handle camera photo
+              }
+            }}
+          />
+          <div className="flex-1 relative">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="ask Chatnova"
+              className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex items-center justify-center"
             />
           </div>
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="ask Chatnova"
-            className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex-1"
-          />
           <Button
             onClick={handleSend}
             size="icon"
