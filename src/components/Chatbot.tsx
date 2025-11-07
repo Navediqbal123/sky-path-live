@@ -159,126 +159,156 @@ export function Chatbot() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-
-      <ScrollArea className="flex-1 px-6 py-6 pt-8" ref={scrollRef}>
-        <div className="space-y-4 pb-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+    <div className="flex h-full">
+      {/* Main Chat Area */}
+      <div className="flex flex-col flex-1">
+        <ScrollArea className="flex-1 px-6 py-6 pt-8" ref={scrollRef}>
+          <div className="space-y-4 pb-4">
+            {messages.map((message) => (
               <div
-                className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-3 transition-all ${
-                  message.sender === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-sm"
-                    : "bg-card border border-border rounded-bl-sm"
+                key={message.id}
+                className={`flex ${
+                  message.sender === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className="flex items-end gap-3 justify-between">
-                  <p className="text-sm leading-relaxed flex-1">{message.text}</p>
-                  <span className="text-xs opacity-60 whitespace-nowrap">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+                <div
+                  className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-3 transition-all ${
+                    message.sender === "user"
+                      ? "bg-primary text-primary-foreground rounded-br-sm"
+                      : "bg-card border border-border rounded-bl-sm"
+                  }`}
+                >
+                  <div className="flex items-end gap-3 justify-between">
+                    <p className="text-sm leading-relaxed flex-1">{message.text}</p>
+                    <span className="text-xs opacity-60 whitespace-nowrap">
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
-
-      <div className="border-t border-border/50 px-6 py-4">
-        <div className="flex gap-2 items-center">
-          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className="h-[60px] w-[60px] rounded-full shrink-0"
-              >
-                <Plus className={`h-5 w-5 transition-transform duration-300 ${isPopoverOpen ? 'rotate-180' : ''}`} />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-40 p-2 bg-background z-50" align="start">
-              <div className="flex flex-col gap-1">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2"
-                  onClick={() => {
-                    document.getElementById('gallery-upload')?.click();
-                    setIsPopoverOpen(false);
-                  }}
-                >
-                  <Upload className="h-4 w-4" />
-                  <span>Gallery</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2"
-                  onClick={() => {
-                    document.getElementById('camera-input')?.click();
-                    setIsPopoverOpen(false);
-                  }}
-                >
-                  <Camera className="h-4 w-4" />
-                  <span>Camera</span>
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-          <input
-            id="gallery-upload"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                console.log("Gallery file selected:", file);
-                // Handle gallery upload
-              }
-            }}
-          />
-          <input
-            id="camera-input"
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                console.log("Camera photo taken:", file);
-                // Handle camera photo
-              }
-            }}
-          />
-          <div className="flex-1 relative">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="ask Chatnova"
-              className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex items-center justify-center"
-            />
+            ))}
           </div>
-          <Button
-            onClick={handleSend}
-            size="icon"
-            className="h-[60px] w-[60px] rounded-full shrink-0"
-            disabled={!input.trim() || isLoading}
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+        </ScrollArea>
+
+        <div className="border-t border-border/50 px-6 py-4">
+          <div className="flex gap-2 items-center">
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-[60px] w-[60px] rounded-full shrink-0 hover:bg-primary/10 hover:scale-110 transition-all duration-300 border border-border/50"
+                >
+                  <Plus className={`h-6 w-6 transition-transform duration-500 ${isPopoverOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-2 bg-background z-50 shadow-lg border border-border" align="start">
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    onClick={() => {
+                      document.getElementById('gallery-upload')?.click();
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span>Gallery</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    onClick={() => {
+                      document.getElementById('camera-input')?.click();
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    <Camera className="h-4 w-4" />
+                    <span>Camera</span>
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <input
+              id="gallery-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  console.log("Gallery file selected:", file);
+                  // Handle gallery upload
+                }
+              }}
+            />
+            <input
+              id="camera-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  console.log("Camera photo taken:", file);
+                  // Handle camera photo
+                }
+              }}
+            />
+            <div className="flex-1 relative">
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="ask Chatnova"
+                className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex items-center justify-center"
+              />
+            </div>
+            <Button
+              onClick={handleSend}
+              size="icon"
+              className="h-[60px] w-[60px] rounded-full shrink-0"
+              disabled={!input.trim() || isLoading}
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Press Enter to send, Shift+Enter for new line
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Press Enter to send, Shift+Enter for new line
-        </p>
+      </div>
+
+      {/* Right Side Chat History */}
+      <div className="hidden lg:block w-80 border-l border-border/50 bg-muted/30">
+        <div className="p-4 border-b border-border/50">
+          <h3 className="font-semibold text-sm">Chat History</h3>
+        </div>
+        <ScrollArea className="h-[calc(100vh-8rem)]">
+          <div className="p-4 space-y-2">
+            {[
+              { id: 1, title: "Recent Chat", time: "2 hours ago", preview: "How can I help you?" },
+              { id: 2, title: "Yesterday", time: "Yesterday", preview: "Flight information query" },
+              { id: 3, title: "Last Week", time: "5 days ago", preview: "Airport details discussion" },
+              { id: 4, title: "Previous Chat", time: "1 week ago", preview: "Travel planning assistance" },
+            ].map((chat) => (
+              <div
+                key={chat.id}
+                className="p-3 rounded-lg hover:bg-background/80 cursor-pointer transition-colors border border-border/30"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="text-sm font-medium truncate">{chat.title}</h4>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{chat.time}</span>
+                </div>
+                <p className="text-xs text-muted-foreground truncate">{chat.preview}</p>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
