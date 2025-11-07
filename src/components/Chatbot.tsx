@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send } from "lucide-react";
+import { Send, Upload, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -192,12 +192,57 @@ export function Chatbot() {
 
       <div className="border-t border-border/50 px-6 py-4">
         <div className="flex gap-2 items-end">
+          <div className="flex gap-2">
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-[60px] w-[60px] rounded-full shrink-0"
+              onClick={() => document.getElementById('gallery-upload')?.click()}
+            >
+              <Upload className="h-5 w-5" />
+            </Button>
+            <input
+              id="gallery-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  console.log("Gallery file selected:", file);
+                  // Handle gallery upload
+                }
+              }}
+            />
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-[60px] w-[60px] rounded-full shrink-0"
+              onClick={() => document.getElementById('camera-input')?.click()}
+            >
+              <Camera className="h-5 w-5" />
+            </Button>
+            <input
+              id="camera-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  console.log("Camera photo taken:", file);
+                  // Handle camera photo
+                }
+              }}
+            />
+          </div>
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="min-h-[60px] max-h-[120px] resize-none rounded-2xl"
+            placeholder="ask Chatnova"
+            className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex-1"
           />
           <Button
             onClick={handleSend}
