@@ -13,15 +13,60 @@ interface Message {
   timestamp: Date;
 }
 
+interface ChatHistory {
+  id: number;
+  title: string;
+  time: string;
+  preview: string;
+  messages: Message[];
+}
+
 export function Chatbot() {
-  const [messages, setMessages] = useState<Message[]>([
+  const [chatHistories, setChatHistories] = useState<ChatHistory[]>([
     {
-      id: "1",
-      text: "Hello! I'm your AI assistant. How can I help you today?",
-      sender: "bot",
-      timestamp: new Date(),
+      id: 1,
+      title: "Recent Chat",
+      time: "2 hours ago",
+      preview: "How can I help you?",
+      messages: [
+        {
+          id: "1",
+          text: "Hello! I'm your AI assistant. How can I help you today?",
+          sender: "bot",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: "Yesterday",
+      time: "Yesterday",
+      preview: "Flight information query",
+      messages: [
+        {
+          id: "1",
+          text: "Hello! I'm your AI assistant. How can I help you today?",
+          sender: "bot",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
+        },
+        {
+          id: "2",
+          text: "Can you help me find flights to Paris?",
+          sender: "user",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
+        },
+        {
+          id: "3",
+          text: "Of course! I can help you search for flights to Paris. Let me find some options for you.",
+          sender: "bot",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
+        },
+      ],
     },
   ]);
+  
+  const [currentChatId, setCurrentChatId] = useState<number>(1);
+  const [messages, setMessages] = useState<Message[]>(chatHistories[0].messages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -145,10 +190,50 @@ export function Chatbot() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    
+    // Update current chat history
+    setChatHistories((prev) =>
+      prev.map((chat) =>
+        chat.id === currentChatId
+          ? { ...chat, messages: updatedMessages, preview: input }
+          : chat
+      )
+    );
+    
     setInput("");
     setIsLoading(true);
     streamChat(userMessage);
+  };
+
+  const handleChatSelect = (chatId: number) => {
+    const selectedChat = chatHistories.find((chat) => chat.id === chatId);
+    if (selectedChat) {
+      setCurrentChatId(chatId);
+      setMessages(selectedChat.messages);
+    }
+  };
+
+  const handleNewChat = () => {
+    const newChatId = Date.now();
+    const newChat: ChatHistory = {
+      id: newChatId,
+      title: "New Chat",
+      time: "Just now",
+      preview: "Start a new conversation",
+      messages: [
+        {
+          id: "1",
+          text: "Hello! I'm your AI assistant. How can I help you today?",
+          sender: "bot",
+          timestamp: new Date(),
+        },
+      ],
+    };
+    setChatHistories((prev) => [newChat, ...prev]);
+    setCurrentChatId(newChatId);
+    setMessages(newChat.messages);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -285,20 +370,28 @@ export function Chatbot() {
 
       {/* Right Side Chat History */}
       <div className="hidden lg:block w-80 border-l border-border/50 bg-muted/30">
-        <div className="p-4 border-b border-border/50">
+        <div className="p-4 border-b border-border/50 flex items-center justify-between">
           <h3 className="font-semibold text-sm">Chat History</h3>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 text-xs"
+            onClick={handleNewChat}
+          >
+            + New Chat
+          </Button>
         </div>
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className="p-4 space-y-2">
-            {[
-              { id: 1, title: "Recent Chat", time: "2 hours ago", preview: "How can I help you?" },
-              { id: 2, title: "Yesterday", time: "Yesterday", preview: "Flight information query" },
-              { id: 3, title: "Last Week", time: "5 days ago", preview: "Airport details discussion" },
-              { id: 4, title: "Previous Chat", time: "1 week ago", preview: "Travel planning assistance" },
-            ].map((chat) => (
+            {chatHistories.map((chat) => (
               <div
                 key={chat.id}
-                className="p-3 rounded-lg hover:bg-background/80 cursor-pointer transition-colors border border-border/30"
+                onClick={() => handleChatSelect(chat.id)}
+                className={`p-3 rounded-lg hover:bg-background/80 cursor-pointer transition-all border ${
+                  currentChatId === chat.id
+                    ? "bg-background border-primary/50 shadow-sm"
+                    : "border-border/30"
+                }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-medium truncate">{chat.title}</h4>
