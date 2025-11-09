@@ -31,7 +31,7 @@ export function Chatbot() {
       messages: [
         {
           id: "1",
-          text: "Hello! I'm your AI assistant. How can I help you today?",
+          text: "Hello I'm Chatnova AI how can I help you today",
           sender: "bot",
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
         },
@@ -45,7 +45,7 @@ export function Chatbot() {
       messages: [
         {
           id: "1",
-          text: "Hello! I'm your AI assistant. How can I help you today?",
+          text: "Hello I'm Chatnova AI how can I help you today",
           sender: "bot",
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
         },
@@ -228,7 +228,7 @@ export function Chatbot() {
       messages: [
         {
           id: "1",
-          text: "Hello! I'm your AI assistant. How can I help you today?",
+          text: "Hello I'm Chatnova AI how can I help you today",
           sender: "bot",
           timestamp: new Date(),
         },
@@ -438,8 +438,8 @@ export function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="ask Chatnova"
-                className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex items-center justify-center"
+                placeholder="ask Chatnova Ai"
+                className="min-h-[60px] max-h-[120px] resize-none rounded-2xl placeholder:text-left px-4"
               />
             </div>
             <Button
