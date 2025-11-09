@@ -70,6 +70,9 @@ export function Chatbot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -243,6 +246,92 @@ export function Chatbot() {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+      toast({
+        title: "Microphone Error",
+        description: "Could not access microphone. Please check permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      setIsLoading(true);
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64Audio = reader.result?.toString().split(',')[1];
+        
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/transcribe-audio`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ audio: base64Audio }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Transcription failed');
+        }
+
+        const data = await response.json();
+        setInput(data.text);
+      };
+    } catch (error) {
+      console.error("Transcription error:", error);
+      toast({
+        title: "Transcription Error",
+        description: "Failed to transcribe audio. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMicClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   return (
     <div className="flex h-full">
       {/* Main Chat Area */}
@@ -356,19 +445,24 @@ export function Chatbot() {
             <Button
               size="icon"
               variant="ghost"
-              className="h-[60px] w-[60px] rounded-full shrink-0 hover:bg-primary/10 hover:scale-110 transition-all duration-300 border border-border/50"
-              onClick={() => console.log("Voice input clicked")}
+              className={`h-[60px] w-[60px] rounded-full shrink-0 hover:scale-110 transition-all duration-300 border border-border/50 ${
+                isRecording ? 'bg-red-500/20 hover:bg-red-500/30 animate-pulse' : 'hover:bg-primary/10'
+              }`}
+              onClick={handleMicClick}
+              disabled={isLoading}
             >
-              <Mic className="h-6 w-6" />
+              <Mic className={`h-6 w-6 ${isRecording ? 'text-red-500' : ''}`} />
             </Button>
-            <Button
-              onClick={handleSend}
-              size="icon"
-              className="h-[60px] w-[60px] rounded-full shrink-0"
-              disabled={!input.trim() || isLoading}
-            >
-              <Send className="h-5 w-5" />
-            </Button>
+            {input.trim() && (
+              <Button
+                onClick={handleSend}
+                size="icon"
+                className="h-[60px] w-[60px] rounded-full shrink-0"
+                disabled={isLoading}
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Press Enter to send, Shift+Enter for new line
