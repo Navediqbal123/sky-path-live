@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Upload, Camera, Plus, Mic } from "lucide-react";
+import { Send, Upload, Camera, Plus, Mic, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -70,6 +70,7 @@ export function Chatbot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -336,6 +337,63 @@ export function Chatbot() {
     <div className="flex h-full">
       {/* Main Chat Area */}
       <div className="flex flex-col flex-1">
+        {/* Chat Header with History Button */}
+        <div className="border-b border-border/50 px-6 py-3 flex items-center justify-between">
+          <h2 className="font-semibold text-lg">ChatNova AI</h2>
+          <Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+              >
+                <History className="h-4 w-4" />
+                Chat History
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0 bg-background" align="end">
+              <div className="p-4 border-b border-border/50 flex items-center justify-between">
+                <h3 className="font-semibold text-sm">Chat History</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    handleNewChat();
+                    setIsHistoryOpen(false);
+                  }}
+                >
+                  + New Chat
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="p-4 space-y-2">
+                  {chatHistories.map((chat) => (
+                    <div
+                      key={chat.id}
+                      onClick={() => {
+                        handleChatSelect(chat.id);
+                        setIsHistoryOpen(false);
+                      }}
+                      className={`p-3 rounded-lg hover:bg-background/80 cursor-pointer transition-all border ${
+                        currentChatId === chat.id
+                          ? "bg-muted border-primary/50 shadow-sm"
+                          : "border-border/30"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="text-sm font-medium truncate">{chat.title}</h4>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{chat.time}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{chat.preview}</p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
+        </div>
+
         <ScrollArea className="flex-1 px-6 py-6 pt-8" ref={scrollRef}>
           <div className="space-y-4 pb-4">
             {messages.map((message) => (
@@ -439,7 +497,7 @@ export function Chatbot() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="ask Chatnova Ai"
-                className="min-h-[60px] max-h-[120px] resize-none rounded-2xl placeholder:text-left px-4"
+                className="min-h-[60px] max-h-[120px] resize-none rounded-2xl px-4 py-4 flex items-center"
               />
             </div>
             <Button
