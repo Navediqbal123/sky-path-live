@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Upload, Camera, Plus } from "lucide-react";
+import { Send, Upload, Camera, Plus, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -353,6 +353,14 @@ export function Chatbot() {
                 className="min-h-[60px] max-h-[120px] resize-none rounded-2xl text-center placeholder:text-center flex items-center justify-center"
               />
             </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-[60px] w-[60px] rounded-full shrink-0 hover:bg-primary/10 hover:scale-110 transition-all duration-300 border border-border/50"
+              onClick={() => console.log("Voice input clicked")}
+            >
+              <Mic className="h-6 w-6" />
+            </Button>
             <Button
               onClick={handleSend}
               size="icon"
