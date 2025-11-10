@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Menu, Mic, Shield, Trash2 } from "lucide-react";
+import { Send, MoreVertical, Mic, Shield, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -70,7 +70,7 @@ export function Chatbot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -375,9 +375,9 @@ export function Chatbot() {
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="h-10 w-10 rounded-lg hover:bg-primary/10 transition-all"
+            className="h-10 w-10 rounded-lg hover:bg-muted active:bg-muted transition-colors"
           >
-            <Menu className="h-5 w-5" />
+            <MoreVertical className="h-5 w-5" />
           </Button>
         </div>
 
