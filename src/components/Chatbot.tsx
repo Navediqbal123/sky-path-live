@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Upload, Camera, Plus, Mic } from "lucide-react";
+import { Send, Upload, Camera, Plus, Mic, Menu, Shield, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -71,6 +72,8 @@ export function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -81,6 +84,22 @@ export function Chatbot() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .single();
+        setIsAdmin(!!data);
+      }
+    };
+    checkAdminRole();
+  }, []);
 
   const streamChat = async (userMsg: Message) => {
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
@@ -215,7 +234,22 @@ export function Chatbot() {
     if (selectedChat) {
       setCurrentChatId(chatId);
       setMessages(selectedChat.messages);
+      setIsSidebarOpen(false);
     }
+  };
+
+  const handleDeleteChat = (chatId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setChatHistories((prev) => prev.filter((chat) => chat.id !== chatId));
+    if (currentChatId === chatId && chatHistories.length > 1) {
+      const remainingChats = chatHistories.filter((chat) => chat.id !== chatId);
+      setCurrentChatId(remainingChats[0].id);
+      setMessages(remainingChats[0].messages);
+    }
+    toast({
+      title: "Chat Deleted",
+      description: "Chat history has been removed.",
+    });
   };
 
   const handleNewChat = () => {
@@ -337,8 +371,16 @@ export function Chatbot() {
       {/* Main Chat Area */}
       <div className="flex flex-col flex-1">
         {/* Chat Header */}
-        <div className="border-b border-border/50 px-6 py-3">
+        <div className="border-b border-border/50 px-6 py-3 flex items-center justify-between">
           <h2 className="font-semibold text-lg">ChatNova AI</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="lg:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
 
         <ScrollArea className="flex-1 px-6 py-6 pt-8" ref={scrollRef}>
@@ -476,7 +518,7 @@ export function Chatbot() {
       </div>
 
       {/* Right Side Chat History */}
-      <div className="w-80 border-l border-border/50 bg-muted/30">
+      <div className={`${isSidebarOpen ? 'block' : 'hidden lg:block'} w-80 border-l border-border/50 bg-muted/30`}>
         <div className="p-4 border-b border-border/50 flex items-center justify-between">
           <h3 className="font-semibold text-sm">Chat History</h3>
           <Button
@@ -489,24 +531,50 @@ export function Chatbot() {
           </Button>
         </div>
         <ScrollArea className="h-[calc(100vh-8rem)]">
-          <div className="p-4 space-y-2">
-            {chatHistories.map((chat) => (
-              <div
-                key={chat.id}
-                onClick={() => handleChatSelect(chat.id)}
-                className={`p-3 rounded-lg hover:bg-background/80 cursor-pointer transition-all border ${
-                  currentChatId === chat.id
-                    ? "bg-background border-primary/50 shadow-sm"
-                    : "border-border/30"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-medium truncate">{chat.title}</h4>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{chat.time}</span>
+          <div className="p-4 space-y-4">
+            {/* Admin Panel */}
+            {isAdmin && (
+              <div className="border border-primary/30 rounded-lg p-3 bg-primary/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <h4 className="text-sm font-semibold text-primary">Admin Panel</h4>
                 </div>
-                <p className="text-xs text-muted-foreground truncate">{chat.preview}</p>
+                <p className="text-xs text-muted-foreground mb-2">Manage chat histories</p>
               </div>
-            ))}
+            )}
+
+            {/* Chat History List */}
+            <div className="space-y-2">
+              {chatHistories.map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => handleChatSelect(chat.id)}
+                  className={`p-3 rounded-lg hover:bg-background/80 cursor-pointer transition-all border ${
+                    currentChatId === chat.id
+                      ? "bg-background border-primary/50 shadow-sm"
+                      : "border-border/30"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-sm font-medium truncate">{chat.title}</h4>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{chat.time}</span>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 hover:bg-destructive/20 hover:text-destructive"
+                          onClick={(e) => handleDeleteChat(chat.id, e)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">{chat.preview}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </ScrollArea>
       </div>
