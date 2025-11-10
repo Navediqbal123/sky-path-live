@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Upload, Camera, Plus, Mic, Menu, Shield, Trash2 } from "lucide-react";
+import { Send, Menu, Mic, Shield, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -70,7 +69,6 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Message[]>(chatHistories[0].messages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -377,7 +375,7 @@ export function Chatbot() {
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="lg:hidden"
+            className="h-10 w-10 rounded-lg hover:bg-primary/10 transition-all"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -416,43 +414,6 @@ export function Chatbot() {
 
         <div className="border-t border-border/50 px-6 py-4">
           <div className="flex gap-2 items-center">
-            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-[60px] w-[60px] rounded-full shrink-0 hover:bg-primary/10 hover:scale-110 transition-all duration-300 border border-border/50"
-                >
-                  <Plus className={`h-6 w-6 transition-transform duration-500 ${isPopoverOpen ? 'rotate-180' : ''}`} />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40 p-2 bg-background z-50 shadow-lg border border-border" align="start">
-                <div className="flex flex-col gap-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                    onClick={() => {
-                      document.getElementById('gallery-upload')?.click();
-                      setIsPopoverOpen(false);
-                    }}
-                  >
-                    <Upload className="h-4 w-4" />
-                    <span>Gallery</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                    onClick={() => {
-                      document.getElementById('camera-input')?.click();
-                      setIsPopoverOpen(false);
-                    }}
-                  >
-                    <Camera className="h-4 w-4" />
-                    <span>Camera</span>
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
             <input
               id="gallery-upload"
               type="file"
