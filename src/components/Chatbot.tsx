@@ -375,7 +375,7 @@ export function Chatbot() {
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="h-10 w-10 rounded-lg hover:bg-muted active:bg-muted transition-colors"
+            className="h-10 w-10 rounded-lg bg-navy-elevated border border-border/50 hover:bg-navy-elevated hover:border-primary/50 hover:text-primary active:scale-95 transition-all duration-300"
           >
             <MoreVertical className="h-5 w-5" />
           </Button>
