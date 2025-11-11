@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, MoreVertical, Mic, Shield, Trash2 } from "lucide-react";
+import { Send, MoreVertical, Mic, Shield, Trash2, Plus, Image as ImageIcon, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,6 +12,7 @@ interface Message {
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
+  image?: string;
 }
 
 interface ChatHistory {
@@ -72,6 +74,8 @@ export function Chatbot() {
   const [isRecording, setIsRecording] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -201,13 +205,14 @@ export function Chatbot() {
   };
 
   const handleSend = () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !uploadedImage) || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: input,
+      text: input || "Shared an image",
       sender: "user",
       timestamp: new Date(),
+      image: uploadedImage || undefined,
     };
 
     const updatedMessages = [...messages, userMessage];
@@ -217,12 +222,13 @@ export function Chatbot() {
     setChatHistories((prev) =>
       prev.map((chat) =>
         chat.id === currentChatId
-          ? { ...chat, messages: updatedMessages, preview: input }
+          ? { ...chat, messages: updatedMessages, preview: input || "Shared an image" }
           : chat
       )
     );
     
     setInput("");
+    setUploadedImage(null);
     setIsLoading(true);
     streamChat(userMessage);
   };
@@ -364,6 +370,15 @@ export function Chatbot() {
     }
   };
 
+  const handleImageUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImage(reader.result as string);
+      setIsPopoverOpen(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="flex h-full">
       {/* Main Chat Area */}
@@ -397,6 +412,13 @@ export function Chatbot() {
                       : "bg-card border border-border rounded-bl-sm"
                   }`}
                 >
+                  {message.image && (
+                    <img 
+                      src={message.image} 
+                      alt="Uploaded" 
+                      className="max-w-full rounded-lg mb-2 max-h-64 object-cover"
+                    />
+                  )}
                   <div className="flex items-end gap-3 justify-between">
                     <p className="text-sm leading-relaxed flex-1">{message.text}</p>
                     <span className="text-xs opacity-60 whitespace-nowrap">
@@ -422,8 +444,8 @@ export function Chatbot() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  console.log("Gallery file selected:", file);
-                  // Handle gallery upload
+                  handleImageUpload(file);
+                  e.target.value = '';
                 }
               }}
             />
@@ -436,12 +458,62 @@ export function Chatbot() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  console.log("Camera photo taken:", file);
-                  // Handle camera photo
+                  handleImageUpload(file);
+                  e.target.value = '';
                 }
               }}
             />
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-[60px] w-[60px] rounded-full shrink-0 hover:scale-110 transition-all duration-300 border border-border/50 hover:bg-primary/10"
+                >
+                  <Plus className="h-6 w-6" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2" align="start">
+                <div className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    onClick={() => document.getElementById('gallery-upload')?.click()}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    Gallery
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    onClick={() => document.getElementById('camera-input')?.click()}
+                  >
+                    <Camera className="h-4 w-4" />
+                    Camera
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
             <div className="flex-1 relative">
+              {uploadedImage && (
+                <div className="absolute -top-24 left-0 right-0 bg-card border border-border rounded-lg p-2 mb-2">
+                  <div className="relative inline-block">
+                    <img 
+                      src={uploadedImage} 
+                      alt="Preview" 
+                      className="max-h-20 rounded-lg"
+                    />
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                      onClick={() => setUploadedImage(null)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -461,7 +533,7 @@ export function Chatbot() {
             >
               <Mic className={`h-6 w-6 ${isRecording ? 'text-red-500' : ''}`} />
             </Button>
-            {input.trim() && (
+            {(input.trim() || uploadedImage) && (
               <Button
                 onClick={handleSend}
                 size="icon"
